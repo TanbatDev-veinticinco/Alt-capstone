@@ -1,0 +1,8 @@
+from pydantic import BaseModel, field_validator
+from typing import Optional
+
+class CourseCreate(BaseModel):
+    title: str 
+    code: str 
+    capacity: int
+    
