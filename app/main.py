@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 
-from app.api.v1 import auth, courses
+from app.api.v1 import auth, courses, enrollments
 
 
 app = FastAPI(
@@ -12,6 +12,7 @@ app = FastAPI(
 
 app.include_router(auth.router, prefix="/api/v1")
 app.include_router(courses.router, prefix="/api/v1")
+app.include_router(enrollments.router, prefix="/api/v1")
 
 
 @app.get("/")
