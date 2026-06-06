@@ -1,7 +1,18 @@
 from fastapi import FastAPI
 
-app = FastAPI()
+from app.api.v1 import auth
+
+
+app = FastAPI(
+    title="Course Enrollment Platform API",
+    description="FastAPI backend for course enrollment with authentication and RBAC.",
+    version="1.0.0",
+)
+
+
+app.include_router(auth.router, prefix="/api/v1")
+
 
 @app.get("/")
 def read_root():
-    return {"Hello": "World"}
+    return {"message": "Course Enrollment Platform API is running"}
