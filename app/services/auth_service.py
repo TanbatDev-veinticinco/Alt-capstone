@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 from typing import Optional
 
 from fastapi import Depends, HTTPException, status, Request
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError, jwt
 from sqlalchemy.orm import Session
 
@@ -12,16 +13,25 @@ from app.repositories import user_repository
 from app.schemas.user import TokenData
 
 
-def get_token_from_cookie(request: Request) -> str:
+bearer_scheme = HTTPBearer(auto_error=False)
+
+
+def get_token(
+    request: Request,
+    credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme)
+) -> str:
+    if credentials:
+        return credentials.credentials
+
     token = request.cookies.get("access_token")
 
-    if not token:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Not authenticated",
-        )
+    if token:
+        return token
 
-    return token
+    raise HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Not authenticated",
+    )
 
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
@@ -39,7 +49,7 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -
     )
 
 def get_current_user(
-    token: str = Depends(get_token_from_cookie),
+    token: str = Depends(get_token),
     db: Session = Depends(get_db)
 ) -> User:
     credentials_exception = HTTPException(

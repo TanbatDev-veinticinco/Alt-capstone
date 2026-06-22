@@ -35,6 +35,7 @@ def login(
 
     return {
         "message": "Login successful",
+        "access_token": token_data["access_token"],
         "token_type": token_data["token_type"]
     }
 

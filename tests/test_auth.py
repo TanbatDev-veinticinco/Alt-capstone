@@ -70,6 +70,7 @@ def test_login_sets_http_only_cookie(client, student_user):
 
     assert response.status_code == 200
     assert response.json()["message"] == "Login successful"
+    assert "access_token" in response.json()
     assert "access_token" in response.cookies
     assert "httponly" in response.headers["set-cookie"].lower()
 
@@ -95,6 +96,20 @@ def test_inactive_user_cannot_login(client, db_session):
 
 def test_get_profile_with_cookie_success(student_client, student_user):
     response = student_client.get("/api/v1/auth/me")
+
+    assert response.status_code == 200
+    assert response.json()["email"] == student_user.email
+
+
+def test_get_profile_with_bearer_token_success(client, student_user):
+    login_response = login(client, student_user.email)
+    token = login_response.json()["access_token"]
+    client.cookies.clear()
+
+    response = client.get(
+        "/api/v1/auth/me",
+        headers={"Authorization": f"Bearer {token}"}
+    )
 
     assert response.status_code == 200
     assert response.json()["email"] == student_user.email
